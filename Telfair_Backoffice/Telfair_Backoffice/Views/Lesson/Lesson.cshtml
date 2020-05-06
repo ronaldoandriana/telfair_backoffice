@@ -1,0 +1,123 @@
+﻿@model Telfair_Backend.Classes.Models.LessonModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Level";
+}
+
+@using (Html.BeginForm("SaveLesson", "Lesson", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false"@*, onsubmit = "return confirm('Are you sure to save changes?');"*@ }))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Level</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    @*left side*@
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.HiddenFor(m => m.Id)
+                                @Html.HiddenFor(m => m.MyId)
+                                @Html.HiddenFor(m => m.Status)
+                                @Html.LabelFor(m => m.Name)
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Description)
+                                @Html.TextBoxFor(m => m.Description, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Department:</label>
+                                @Html.DropDownListFor(m => m.DepartmentNodeId, (SelectList)ViewBag.NodeDepartment, "--Select departement--", new { @class = "form-control" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Grade</label>
+                                @Html.DropDownListFor(m => m.LevelNodeId, (SelectList)ViewBag.NodeLevel, "--Select department first--", new { @class = "form-control" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Subject</label>
+                                @Html.DropDownListFor(m => m.SubjectId, (SelectList)ViewBag.Subject, "--Select grade first--", new { @class = "form-control", @required = "required" })
+                                <span asp-validation-for="SubjectId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-info">SAVE</button>
+                    <a href="/Lesson/ViewLesson"><button type="button" class="btn btn-info">CANCEL</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        $(document)
+            .ready(function () {
+
+                $(function () {
+                    $("#LevelNodeId").change(function () {
+                        $.getJSON("/Subject/ViewSubjectByLevel", { levelId: $("#LevelNodeId option:selected").val() },
+                            function (results) {
+                                $("#SubjectId").empty();
+                                //LoadLessons($("#Subjects option:selected").val());
+
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option>--Select subject--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#SubjectId").append(options);
+
+                            });
+                    });
+                });
+
+                $(function () {
+                    $("#DepartmentNodeId").change(function () {
+                        $.getJSON("/Lesson/GetNodesByParent", { parentNodeId: $("#DepartmentNodeId option:selected").val() },
+                            function (results) {
+                                $("#LevelNodeId").empty();
+                                $("#SubjectId").empty();
+                                //LoadLessons($("#Subjects option:selected").val());
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option>--Select grade--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#LevelNodeId").append(options);
+                                $("#SubjectId").append("<option>--Select grade first--</option>");
+
+                            });
+                    });
+                });
+            });
+
+    </script>
+
+}
+    <script>
+        (function () {
+            var link = document.getElementById("lesson-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+
+
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

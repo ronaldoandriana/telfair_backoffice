@@ -1,0 +1,118 @@
+﻿@using Telfair_Backend.Classes.Models
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "HomeWork";
+    List<HomeWorkModel> homeWorkModels = null;
+    if (ViewBag.homeWorkModels != null)
+    {
+        homeWorkModels = ViewBag.homeWorkModels as List<HomeWorkModel>;
+    }
+}
+@using Telfair_Backend.Classes.Services
+ <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">View HomeWork</h3>
+            </div>
+            <div id="Grid">
+
+                <table class="table">
+                    <tr>
+                        <th>
+                            Grade
+                        </th>
+                        <th>
+                            Subject
+                        </th>
+                        <th>
+                            Title or Chapter
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                        <th>
+                            Deadline
+                        </th>
+                        <th></th>
+                    </tr>
+
+                    @foreach (var homeWorkModel in homeWorkModels)
+                    {
+                    <tr>
+                        <td>
+                            @homeWorkModel.LevelNodeId
+                        </td>
+                        <td>
+                            @homeWorkModel.SubjectId
+                        </td>
+                        <td>
+                            @homeWorkModel.Title
+                        </td>
+                        <td>
+                            @homeWorkModel.ActionId
+                        </td>
+                        <td>
+                            @(new PageUtility().FormatDate(homeWorkModel.DateLimit))
+                        </td>
+                        <td>
+                            <a href="#" data-toggle="modal" onclick="setModalBody(String.raw`@homeWorkModel.Description`, String.raw`@homeWorkModel.AttachmentsDOM()`)" data-target="#detail_homework">View</a> |
+                            <a href="/HomeWork/Edit?id=@homeWorkModel.Id">Edit</a> |
+                            <a href="#" onclick="deleteUser('@homeWorkModel.Id')">Delete</a>
+                        </td>
+                    </tr>
+                    }
+                </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        @(new Microsoft.AspNetCore.Html.HtmlString(ViewBag.pagination))
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    function setModalBody(element, a_dom) {
+        var modal_body = document.getElementById("modal_body");
+        if (modal_body) modal_body.innerHTML = element + "" + a_dom;
+    }
+</script>
+
+<div class="modal fade" id="detail_homework" tabindex="-1" role="dialog" aria-labelledby="detailHomework" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Homework detail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modal_body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var link = document.getElementById("homework-link");
+        if (link) link.classList.add("active_link");
+    })();
+</script>
+
+<script type="text/javascript">
+    function deleteUser(id) {
+        if (confirm("Do you want to delete this item?")) {
+            window.location.href = "/HomeWork/Delete/" + id;
+        }
+    }
+</script>
+
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

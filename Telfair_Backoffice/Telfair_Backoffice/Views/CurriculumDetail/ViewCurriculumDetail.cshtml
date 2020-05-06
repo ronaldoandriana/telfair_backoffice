@@ -1,0 +1,68 @@
+﻿@model IEnumerable<Telfair_Backend.Classes.Models.CurriculumDetailModel>;
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "View Curriculum Details";
+}
+
+@using (Html.BeginForm())
+{
+    <!-- left column -->
+<div class="col-md-12">
+    <!-- general form elements -->
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">View Curriculum Details</h3>
+        </div>
+        <div id="Grid">
+
+            <table class="table">
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CurriculumName)
+                    </th>
+                    <th>
+                        Lesson
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Objectives)
+                    </th>
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CurriculumName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LessonName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Objectives)
+                    </td>
+                    <td>
+                        <a href="/Curriculum/Edit?id=@item.Id">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,231 @@
+﻿@model List<Telfair_Backend.Classes.Models.PlanSummaryModel>;
+
+
+@{
+    Layout = "_Layout";
+    var role = (string)ViewBag.RoleName;
+    ViewData["Title"] = "View Weekly Plan";
+}
+
+<div class="col-md-12">
+    <!-- general form elements -->
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">View Weekly Plan</h3>
+        </div>
+        <div id="Grid" class="form-group has-feedback ;">
+
+            @Html.Hidden("role", role)
+            <table class="table table-bordered table-hover">
+                <tr>
+                    @{
+                        if (role != null && role.ToString().ToLower() == "administrator")
+                        {
+                            <th>
+                                Teacher
+                            </th>
+                        }
+                    }
+                    <th>
+                        Subject
+                    </th>
+                    <th>
+                        Year
+                    </th>
+                    <th>
+                        Term
+                    </th>
+                    <th>
+                        Duration
+                    </th>
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                <tr>
+                    @{
+                        if (role != null && role.ToString().ToLower() == "administrator")
+                        {
+                            <td>
+                                @Html.DisplayFor(modelItem => item.EmployeeName)
+                            </td>
+                        }
+                    }
+                    <td>
+                        @*@Html.HiddenFor(modelItem => item.Id)*@
+                        @Html.DisplayFor(modelItem => item.SubjectName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Level)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Term)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Duration)
+                    </td>
+
+                    <td>
+                        <button type="button" onclick="LoadMyWeeklyPlans('@item.SubjectId', '@item.EmployeeId','@item.Term', '@item.Week');" class="btn btn-primary">View Details</button>
+                        <a href="/Plan/Delete/@item.Id">Delete</a>
+
+                        @*<a asp-action="ViewMyPlanDetailsDecision" asp-route-id="@item.Id" class="btn btn-primary">View Details</a>*@
+                    </td>
+
+                </tr>
+                }
+            </table>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    @(new Microsoft.AspNetCore.Html.HtmlString(ViewBag.pagination))
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="modal-default" >
+    <div class="modal-dialog" style="overflow: scroll; max-height: 600px; max-width: 2000px;width:1000px; position:relative" >
+        <div class="modal-content"  >
+            <div class="modal-header" >
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Plan Details</h4>
+            </div>
+            <div class="modal-body" >
+               
+
+                    <table id="PlanDetails" class="table"  >
+                        <tr>
+                            <th>
+                                Subject
+                            </th>
+                            <th>
+                                Lesson
+                            </th>
+                            <th>
+                                Level
+                            </th>
+                            <th>
+                                Week
+                            </th>
+                            <th>
+                                Day
+                            </th>
+
+                        </tr>
+                    </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary">Save changes</button>*@
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@section Scripts
+    {
+    <script type="text/javascript">
+        var test = '';
+
+
+        function LoadMyWeeklyPlans(subjectId, employeeId,term, week) {
+
+            //var page = document.getElementById("Page").value;
+            $.ajax(
+                {
+                    type: "GET",
+                    url: "/Plan/ViewMyWeeklyPlans",
+                    data: { subjectId: subjectId, employeeId: employeeId,term : term, week: week },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#PlanDetails tr:gt(0)").remove();
+                        var table = document.getElementById("PlanDetails");
+
+                        var plans = data;
+                        test = data;
+                        var role = $('#role').val();
+                        for (i = 0; i < plans.length; i++) {
+                            var temp = plans[i];
+                            
+
+                            var row = table.insertRow();
+                            //var cell1 = row.insertCell(0);
+                            var cell1 = row.insertCell(0);
+                            var cell2 = row.insertCell(1);
+                            var cell3 = row.insertCell(2);
+                            var cell4 = row.insertCell(3);
+                            var cell5 = row.insertCell(4);
+                            var cell6 = row.insertCell(5);
+                            
+
+                            cell1.innerHTML = temp.subjectName;
+                            cell2.innerHTML = temp.lessonName;
+                            cell3.innerHTML = temp.aims;
+                            cell4.innerHTML = temp.week;
+                            cell5.innerHTML = temp.days;
+
+                            var btnViewSinglePlan = document.createElement('input');
+                            btnViewSinglePlan.id = "View"+temp.id;
+                            btnViewSinglePlan.type = "button";
+                            btnViewSinglePlan.className = "btn btn-primary";
+                            doClickView(btnViewSinglePlan, temp.id);
+                            btnViewSinglePlan.value = "View";
+                            cell6.appendChild(btnViewSinglePlan);
+                            if (role.toLowerCase() == "administrator" || role.toLowerCase() == "teacher - primary") {
+                                //var cell7 = row.insertCell(6);
+                                var btnEditPlan = document.createElement('input');
+                                btnEditPlan.id = "Edit" + temp.id;
+                                btnEditPlan.type = "button";
+                                btnEditPlan.className = "btn btn-primary";
+                                doClickEdit(btnEditPlan, temp.id);
+                                btnEditPlan.value = "Edit";
+                                cell6.appendChild(btnEditPlan);
+                            }
+                        }
+
+                        $('#modal-default').modal('show');
+                    }
+                });
+
+            return false;
+
+        };
+
+        function doClickEdit(btn, id) {
+            
+            btn.onclick = function () { Edit(id) }
+        };
+
+        function Edit(id) {
+            location.href = '@Url.Action("Edit", "Plan")?id='+id;
+           
+        }
+
+        function doClickView(btn, id) {
+            
+            btn.onclick = function () { View(id) }
+        };
+
+        function View(id) {
+            location.href = '@Url.Action("ViewMyWeeklyPlansDetails", "Plan")?planId='+id;
+           
+        }
+    </script>
+}
+    <script>
+        (function () {
+            var link = document.getElementById("plan-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

@@ -1,0 +1,204 @@
+﻿@model Telfair_Backend.Classes.Models.EmployeeModel
+@using Telfair_Backend.Classes.Models
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Employee";
+}
+
+@using (Html.BeginForm("SaveEmployee", "Employee", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false"@*, onsubmit = "return confirm('Are you sure to save changes?');"*@ }))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">User</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    @*left side*@
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.HiddenFor(m => m.Id)
+                                @Html.HiddenFor(m => m.MyId)
+                                @Html.HiddenFor(m => m.Status)
+                                @Html.HiddenFor(m => m.PersonId)
+                                @Html.HiddenFor(m => m.UserId)
+                                @Html.HiddenFor(m => m.UserRoleId)
+                                @Html.HiddenFor(m => m.RoleName)
+
+                                @Html.Label("First Name*")
+                                @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Middle Name")
+                                @Html.TextBoxFor(m => m.MiddleName, new { @class = "form-control" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Last Name")
+                                @Html.TextBoxFor(m => m.LastName, new { @class = "form-control"})
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("User Name*")
+                                @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @if (ViewBag.isEdit != null && ViewBag.isEdit == true)
+                                {
+                                    @Html.Label("Password*")
+                                    @Html.PasswordFor(m => m.HashCode, new { @class = "form-control", onkeyup = "testPassword()" })
+                                    <p id="password_suggestion" style="color: red;"></p>
+                                    <i>(Keep password field empty if you don't want to change it)</i>
+                                }
+                                else
+                                {
+                                    @Html.Label("Password*")
+                                    @Html.PasswordFor(m => m.HashCode, new { @class = "form-control", onkeyup = "testPassword()", @required = "required" })
+                                    <p id="password_suggestion" style="color: red;"></p>
+                                }
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Role")
+                                @Html.DropDownListFor(m => m.RoleId, (SelectList)ViewBag.Roles, "--Select role--", new { @class = "form-control", @required = "required" })
+                            </div>
+
+                            <div id="SubjectSection" class="form-group has-feedback ;" style="overflow-y: auto; max-height: 600px; max-width: 2000px;width:1000px;">
+                                @Html.HiddenFor(model => model.Subjects)
+
+                                <table id="Lesson" class="table table-bordered table-hover" style="display: none;">
+                                    <thead>
+                                        <tr>
+                                            <td><b>Subject</b></td>
+                                            <td><b>Grade</b></td>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        List<EmployeeSubjectModel> employeeSubjects = Model.EmployeeSubjects as List<EmployeeSubjectModel>;
+                                        if (employeeSubjects != null)
+                                        {
+                                            foreach (var employeeSubject in employeeSubjects)
+                                            {
+                                                <tr>
+                                                    <td><input type="checkbox" name="SelectedEmployeeSubjects" value="@employeeSubject.SubjectId" onchange="getSelected();" checked="@(employeeSubject.Selected)" /> @employeeSubject.SubjectName</td>
+                                                    <td>@employeeSubject.LevelNodeName </td>
+                                                </tr>
+                                                <script>console.log('@(employeeSubject.Selected)')</script>
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                        }
+                                    }
+                                </table>
+                                <table id="Grades" class="table table-bordered table-hover" style="display: none;">
+                                    <thead>
+                                        <tr>
+                                            <td><b>Children's Grade</b></td>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        List<ParentChildrenNodeModel> listGrade = ViewBag.Grades as List<ParentChildrenNodeModel>;
+                                        if (listGrade != null)
+                                        {
+                                            foreach (var grade in listGrade)
+                                            {
+                                                <tr>
+                                                    <td><input type="checkbox" name="SelectedEmployeeSubjects" value="@grade.NodeId" checked="@grade.Selected" onchange="getSelected();" /> @grade.NodeName</td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+
+                                        }
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" id="save_button" class="btn btn-info">SAVE</button>
+                    <a href="/Employee/ViewEmployee"><button type="button" class="btn btn-info">CANCEL</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript" src="~/js/backoffice.js"></script>
+    <script type="text/javascript">       
+        function getSelected() {
+            var subjects = "";
+          
+
+            $('input[type=checkbox]').each(function () {
+                if (this.checked) {
+                    subjects += this.value + ",";
+                  
+                }
+            });
+            $("#Subjects").val(subjects);    
+            return false;
+        }
+
+        function roleChange() {
+            var rolename = $("#RoleId :selected").text();
+            var rolevalue = $("#RoleId :selected").val();
+            $("#RoleName").val(rolename);
+            console.log(rolename == 'Administrator');
+            if (rolename == 'Administrator') {
+                $("#Lesson").css('display', 'none');
+                $("#Grades").css('display', 'none');
+            }
+            else if (rolename == 'Parents') {
+                $("#Lesson").css('display', 'none');
+                $("#Grades").css('display', 'block');
+            }
+            else if (rolevalue == '' || rolevalue == undefined || rolevalue == null) {
+                $("#Lesson").css('display', 'none');
+                $("#Grades").css('display', 'none');
+            }
+            else {
+                $("#Lesson").css('display', 'block');
+                $("#Grades").css('display', 'none');
+            }
+        }
+
+        $(document)
+            .ready(function () {
+                roleChange();
+                getSelected();
+            $(function () {
+                $("#RoleId").change(function () {
+                    getSelected();
+                    roleChange();
+                });
+            });
+        });
+
+    </script>
+
+}
+    <script>
+        (function () {
+            var link = document.getElementById("user-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

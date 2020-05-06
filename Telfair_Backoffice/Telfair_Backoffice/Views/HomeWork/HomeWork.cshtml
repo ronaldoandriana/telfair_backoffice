@@ -1,0 +1,166 @@
+﻿@model Telfair_Backend.Classes.Models.HomeWorkModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "HomeWork";
+}
+<script src="~/ckeditor/ckeditor.js"></script>
+@using (Html.BeginForm("SaveHomeWork", "HomeWork", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false"/*, onsubmit = "return confirm('Are you sure to save changes?');" */}))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">New Exercise</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    @*left side*@
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.HiddenFor(m => m.Id)
+                                @Html.HiddenFor(m => m.Status)
+                                @Html.HiddenFor(m => m.DateCreate)
+
+                                @Html.Label("Deadline")
+                                <input class="form-control" data-val="true" data-val-required="The DateFrom field is required." id="DateLimit" min="@DateTime.Now.ToString("MM'/'dd'/'yyyy")" name="DateLimit" required="required" type="date" value="@(DateTime.Now.AddDays(5).ToString("yyyy'-'MM'-'dd"))">
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Department: </label>
+                                @Html.DropDownListFor(m => m.DepartmentNodeId, (SelectList)ViewBag.NodeDepartment, "--Select departement--", new { @class = "form-control" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Grade</label>
+                                @Html.DropDownListFor(m => m.LevelNodeId, (SelectList)ViewBag.NodeLevel, "--Select grade--", new { @class = "form-control" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Subject</label>
+                                @Html.DropDownListFor(m => m.SubjectId, (SelectList)ViewBag.Subject, "--Select subject--", new { @class = "form-control", @required = "required" })
+
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Title or Chapter")
+                                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Action")
+                                @Html.DropDownListFor(m => m.ActionId, (SelectList)ViewBag.Actions, "--Select action--", new { @class = "form-control", @required = "required" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.Label("Description")
+                                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @required = "required", @row = 10, @cols = 80 })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                <label>Atachments<span style="color: red;">*</span></label>
+                                <input type="file" name="Attachments" id="Attachments" class="btn btn-primary" multiple="multiple" accept=".mp4,.avi,.mkv,.jpg,.jpeg,.png,.gif,.pdf,.ppt,.pptx" />
+                                <p><i><span style="color: red;">*</span> Less than 100MB</i></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @if(ViewBag.IsEdit != null && (bool)ViewBag.IsEdit == true)
+                            {
+                                if (Model.Attachments != null && Model.Attachments.Any())
+                                {
+                                    <div class="form-group has-feedback">
+                                        @Html.Label("Attached files")
+                                        @foreach (Telfair_Backend.Classes.Entity.Attachments attachments in Model.Attachments)
+                                        {
+                                            <p id="parag-@attachments.Id"><img style="height: 20px;" src="~/icons/@(attachments.Type + ".png")" /> @attachments.FileName <span style="float: right;"><a href="~/@attachments.FilePath" download="download" target="_blank"><i class="fa fa-download"></i></a> &nbsp;&nbsp;&nbsp; <a href="#delete" onclick="deleteFile('@attachments.Id')"><span style="color: red" id="icone-@attachments.Id"><i class="fa fa-trash"></i></span></a></span></p>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" id="save_button" class="btn btn-info">SAVE</button>
+                    <a href="/HomeWork/ViewManage"><button type="button" class="btn btn-info">CANCEL</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function deleteFile(id) {
+            var icone = document.getElementById("icone-" + id);
+            var parag = document.getElementById("parag-" + id);
+            if (icone) icone.innerHTML = "<i class='fa fa-spinner fa-pulse'></i>";
+            $.getJSON("/HomeWork/DeleteFile", { id: id },
+                function (results) {
+                    if (results.status == 1) {
+                        if (parag) parag.parentNode.removeChild(parag);
+                        showNotification('Success', results.message, 'success');
+                    }
+                    if (results.status == 0) showNotification('Error', results.message, 'error'); 
+                    if (icone) icone.innerHTML = "<i class='fa fa-trash'></i>";
+                });
+        }
+        $(document)
+            .ready(function () {
+                
+                $(function () {
+                    $("#LevelNodeId").change(function () {
+                        $.getJSON("/Subject/ViewSubjectByLevel", { levelId: $("#LevelNodeId option:selected").val() },
+                            function (results) {
+                                $("#SubjectId").empty();
+                                var options = "<option>--Select subject--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += "<option value = '" + subject.id + "'>" + subject.name + "</option>";
+                                });
+                                $("#SubjectId").append(options);
+                            });
+                    });
+                });
+
+                $(function () {
+                    $("#DepartmentNodeId").change(function () {
+                        $.getJSON("/Lesson/GetNodesByParent", { parentNodeId: $("#DepartmentNodeId option:selected").val() },
+                            function (results) {
+                                $("#LevelNodeId").empty();
+                                $("#SubjectId").empty();
+                                var options = "<option>--Select grade--</option>";
+                                $.each(results, function (i, level) {
+                                    options += '<option value = ' + level.id + '>' + level.name + '</option>';
+                                });
+                                $("#LevelNodeId").append(options);
+                                $("#SubjectId").append("<option>--Select subject--</option>");
+                            });
+                    });
+                });
+            });
+        CKEDITOR.replace('Description');
+    </script>
+}
+
+    <script>
+        (function () {
+            var link = document.getElementById("homework-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+
+
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

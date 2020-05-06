@@ -1,0 +1,110 @@
+﻿@model Telfair_Backend.Classes.Models.RoleAccessControlModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Role access control";
+}
+
+@using (Html.BeginForm("UpdateRole", "Role", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false", onsubmit = "return confirm('Are you sure to save changes?');" }))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Role access control</h3>
+            </div>
+            <div class="box-body">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.Label("Role")
+                                @Html.DropDownListFor(m => m.RoleId, (SelectList)ViewBag.Roles, "--Select role--", new { @class = "form-control", @required = "required", onchange = "loadRoleMenu()" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Accessible link</label>
+                                <div id="accessible_link">
+                                    <p>Select role first</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button id="btnSubmit" type="submit" class="btn btn-info">SAVE</button>
+                    @*<a href="/BackOffice/Role/ViewDepartment"><button type="button" class="btn btn-info">CANCEL</button></a>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script src="~/js/jquery.min.js"></script>
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script>}
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script>}
+<script type="text/javascript">
+    (function () {
+        var link = document.getElementById("role-link");
+        if (link) link.classList.add("active_link");
+    })();
+    function loadRoleMenu() {
+        var accessible_link = document.getElementById('accessible_link');
+        if ($("#RoleId option:selected").val() !== '') {
+            $.getJSON("/Role/GetMenuByRoleId", { roleId: $("#RoleId option:selected").val() },
+                function (results) {
+                    accessible_link.innerHTML = BuildDom(results.data);
+                });
+        }
+        else {
+            if (accessible_link) {
+                accessible_link.innerHTML = "<p>Select role first</p>";
+            }
+        }
+    }
+
+    function BuildDom(data) {
+        var dom = '';
+        dom += '<table class="table">'+
+                    '<thead>'+
+                        '<tr>'+
+                          '<th scope="col">Menu</th>'+
+                          '<th scope="col">Liens</th>'+
+                          '<th scope="col">Autoriser</th>'+
+                        '</tr>'+
+                    '</thead>'+
+                    '<tbody>';
+        for (var i = 0; i < data.length; i++) {
+                dom += '<tr>'+
+                            '<th scope="row">' + data[i].menuName + '</th>' +
+                            '<td>' + data[i].linkModels[0].name + '</td>' +
+                            '<td><input type="checkbox" ' + check(data[i].linkModels[0].cheked)+' /></td>'+
+                '</tr>';
+            for (var j = 1; j < data[i].linkModels.length; j++) {
+                dom += '<tr>' +
+                    '<th scope="row"></th>' +
+                    '<td>' + data[i].linkModels[j].name + '</td>' +
+                    '<td><input type="checkbox" ' + check(data[i].linkModels[j].cheked) + ' /></td>' +
+                    '</tr>';
+            }
+        }
+        dom += '</tbody>' +
+            '</table>';
+        return dom;
+    }
+
+    function check(isChecked) {
+        if (isChecked === true) return 'checked="checked"';
+        else if (isChecked === false) return 'unchecked="unchecked"';
+    }
+</script>

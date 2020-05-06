@@ -1,0 +1,175 @@
+﻿@model IEnumerable<Telfair_Backend.Classes.Models.PlanModel>;
+
+
+@{
+    ViewData["Title"] = "ViewPlan";
+
+    Layout = "";
+}
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SAIMLTD | Log in</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../bower_components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../bower_components/Ionicons/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../dist/css/AdminLTE.min.css">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="../../plugins/iCheck/square/blue.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="~/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/bower_components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="~/bower_components/Ionicons/css/ionicons.min.css">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="~/bower_components/jvectormap/jquery-jvectormap.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/dist/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+    folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="~/dist/css/skins/_all-skins.min.css">
+
+
+
+
+</head>
+<body class="hold-transition login-page">
+    @using (Html.BeginForm())
+{
+
+    <div id="Grid" class="form-group has-feedback">
+        <p><h1>Pre-Primary & Primary Weekly Plan</h1></p>
+        <table class="table">
+            <tr>
+                <td>
+                    Date issued:  @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.ElementAt(0).DateOfIssue))
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Name of Teacher: @Html.DisplayFor(modelItem => Model.ElementAt(0).EmployeeNames)
+                </td>
+                <td>
+                    Week: @Html.DisplayFor(modelItem => Model.ElementAt(0).Week)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @*Date From: @Html.DisplayFor(modelItem => Model.Min(x => x.DateFrom)) To @Html.DisplayFor(modelItem => Model.Max(x => x.DateTo))*@
+                    From: @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.ElementAt(0).DateFrom)) To @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.ElementAt(0).DateTo))
+                </td>
+                <td>
+
+                    Class: @Html.DisplayFor(modelItem => Model.ElementAt(0).NodeLevelName)
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Note: @Html.DisplayFor(modelItem => Model.ElementAt(0).Note)
+                </td>
+                <td>
+                    Term: @Html.DisplayFor(modelItem => Model.ElementAt(0).Term)
+                </td>
+            </tr>
+        </table>
+
+
+        <table class="table">
+            <tr>
+                <th>
+                    Lesson Titles
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Aims)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Materials)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Method)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OutcomesNotes)
+                </th>
+                <th>Date</th>
+            </tr>
+
+            @foreach (var item in Model)
+                {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LessonName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Aims)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Activities)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Materials)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Method)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OutcomesNotes)
+                </td>
+                <td>
+                    @*From: @Html.DisplayFor(modelItem => Model.ElementAt(0).DateFrom) To @Html.DisplayFor(modelItem => Model.ElementAt(0).DateTo)*@
+                    From: @Convert.ToString(string.Format("{0:dd/MM/yyyy}", item.DateFrom)) To @Convert.ToString(string.Format("{0:dd/MM/yyyy}", item.DateTo))
+                </td>
+            </tr>
+                }
+
+
+
+        </table>
+    </div>
+    @*<button type="button" id="btnSubmit" class="btn btn-info">Export</button>*@
+    @*<button type="button" id="testbtn" class="btn btn-info">test</button>*@
+
+    }
+    <!-- /.login-box -->
+    <!-- jQuery 3 -->
+    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script src="../../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- iCheck -->
+    <script src="../../plugins/iCheck/icheck.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    
+</body>
+ 
+
+
+
+
+
+
+
+
+

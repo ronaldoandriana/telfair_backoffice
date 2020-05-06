@@ -1,0 +1,396 @@
+﻿@model Telfair_Backend.Classes.Models.CurriculumPagedModel;
+@*, IEnumerable<MySchool.Models.CurriculumDetailModel>*@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "View Curriculum";
+    var role = (string)ViewBag.RoleName;
+}
+@Html.HiddenFor(x => x.Total)
+@Html.HiddenFor(x => x.PageCount)
+@Html.HiddenFor(x => x.PageSize)
+@Html.HiddenFor(x => x.CurrentPage)
+@using (Html.BeginForm())
+{
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Search Criteria</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group has-feedback">
+                                    Name:@Html.TextBox("curriculumNameSearch", ViewBag.CurriculumName as string, htmlAttributes: new { @class = "form-control" })
+                                </div>
+
+                            </div>
+                            <!-- /.form-group -->
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group has-feedback">
+                                    Description: @Html.TextBox("curriculumDescriptionSearch", ViewBag.CurriculumDescription as string, htmlAttributes: new { @class = "form-control" })
+                                </div>
+                            </div>
+
+                            <!-- /.form-group -->
+                        </div>
+
+
+                        <br />
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="form-group has-feedback">
+                                    <button id="filterQualityControl" type="button" class="btn btn-primary btn-block" onclick="return LoadCurriculums(1);"> Search </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">View Curriculum</h3>
+            </div>
+            <div id="Grid">
+                @Html.Hidden("role", role)
+                <table id="Curriculum" class="table">
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Description
+                        </th>
+                        <th>
+                            Level
+                        </th>
+                    </tr>
+
+                </table>
+                <ul id="paginationDiv" class="pagination"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-default">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">Curriculum Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="Grid">
+
+                        <table id="CurriculumDetails" class="table">
+                            <tr>
+                                <th>
+                                    Subject
+                                </th>
+                                <th>
+                                    Lesson
+                                </th>
+                                <th>
+                                    Objectives
+                                </th>
+                                <th>
+                                    Week
+                                </th>
+                                <th>
+                                    Day
+                                </th>
+
+                            </tr>
+                        </table>
+                    </div>
+                    <ul id="paginationModalDiv" class="pagination"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                    @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+}
+
+@section Scripts
+    {
+    <script type="text/javascript">
+        var test = '';
+        var curriculums = '';
+        var curriculumDetails = '';
+        $(document)
+            .ready(function () {
+                LoadCurriculums(1);
+            });
+
+
+        function LoadCurriculums(pageid) {
+            var name = $("#curriculumNameSearch").val();
+            var description = $("#curriculumDescriptionSearch").val();
+
+
+            //var page = document.getElementById("Page").value;
+            $.ajax(
+                {
+                    type: "GET",
+                    url: "/Curriculum/GetCurriculumsPaged",
+                    data: { employeeId: '', name: name, description: description, levelnodeid: '', page: pageid,pagesize:10 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        curriculums = data.curriculumModels;
+                        $('#PageSize').val(data.pageSize);
+
+                        $("#Curriculum tr:gt(0)").remove();
+                        var table = document.getElementById("Curriculum");
+                        var role = $('#role').val();
+                        for (i = 0; i < data.curriculumModels.length; i++) {
+                            var item = data.curriculumModels[i];
+                            var row = table.insertRow();
+                            var cell1 = row.insertCell(0);
+                            var cell2 = row.insertCell(1);
+                            var cell3 = row.insertCell(2);
+                            var cell4 = row.insertCell(3);
+                            var cell5 = row.insertCell(4);
+                            var cell6 = row.insertCell(5);
+
+                            cell1.innerHTML = item.name;//"NEW CELL1";
+                            cell2.innerHTML = item.description;
+                            cell3.innerHTML = item.levelNodeName;
+
+                            if (role.toLowerCase() == "administrator")
+                            {
+                                //edit button
+                                var btnEdit = document.createElement('input');
+                                btnEdit.id = item.id;
+                                btnEdit.type = "button";
+                                btnEdit.className = "btn btn-primary";
+                                btnEdit.value = "Edit";
+                                cell4.appendChild(btnEdit);
+                                doClickEdit(btnEdit, item.id);
+
+                                //delete button
+                                var btnDelete = document.createElement('input');
+                                btnDelete.id = item.id;
+                                btnDelete.type = "button";
+                                btnDelete.className = "btn btn-primary";
+                                doClickDelete(btnDelete, item.id);
+                                btnDelete.value = "Delete";
+                                cell4.appendChild(btnDelete);
+                            }
+
+                            //view details button
+                            var btn = document.createElement('input');
+                            btn.id = item.id;
+                            btn.type = "button";
+                            btn.className = "btn btn-primary";
+                            doClickView(btn, item.id, 1);
+                            btn.value = "Details";
+
+                            //dropdown div
+                            //var dropdown = document.createElement('div');
+                            //dropdown.className = 'dropdown';
+
+                            //var dropdownbutton = document.createElement('a');
+                            //dropdownbutton.setAttribute('class', 'btn btn-secondary dropdown-toggle');
+                            //dropdownbutton.setAttribute('href', '#');
+                            //dropdownbutton.setAttribute('id', 'dropdownMenuLink');
+                            //dropdownbutton.setAttribute('role', 'button');
+                            //dropdownbutton.setAttribute('data-toggle', 'dropdown');
+                            //dropdownbutton.setAttribute('aria-haspopup', 'true');
+                            //dropdownbutton.setAttribute('aria-expanded', 'false');
+
+                            ////dropdown menu div
+                            //var dropdownmenu = document.createElement('div');
+                            //dropdownmenu.className = 'dropdown-menu';
+
+                            ////dropdown item
+                            //var edit = document.createElement('a');
+                            //edit.className = 'dropdown-item';
+                            //edit.href = '#';
+                            //doClickEdit(edit, item.id);
+
+                            //dropdownmenu.appendChild(edit);
+                            //dropdown.appendChild(dropdownbutton);
+                            //dropdown.appendChild(dropdownmenu);
+                            //cell4.appendChild(dropdown);
+                            cell4.appendChild(btn);
+                        }
+
+                        $('#paginationDiv').pagination({
+                            // the number of entries
+                            total: data.total,//$("#Total").val(),
+                            // current page
+                            current: data.currentPage,// $("#CurrentPage").val(),
+                            // the number of entires per page
+                            length: 10,
+                            // pagination size
+                            size: data.curriculumModels.length,
+                            // Prev/Next text
+                            prev: "&lt;",
+                            next: "&gt;",
+                            // fired on each click
+                            click: function (e) {
+                                LoadCurriculums(e.current)
+                            }
+
+                        });
+                    }
+                });
+
+            return false;
+
+        };
+
+        function doClickView(btn, id,pageid) {
+
+            btn.onclick = function ()
+            {
+
+                $.ajax(
+                    {
+                        type: "GET",
+                        url: "/Curriculum/GetCurriculumDetailsPaged",
+                        data: { curriculumId: id, page: pageid, pagesize: 50000},
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            curriculumDetails = data;
+                            $("#CurriculumDetails tr:gt(0)").remove();
+                            var table = document.getElementById("CurriculumDetails");
+           
+
+                            for (j = 0; j < curriculumDetails.curriculumDetailsModels.length; j++) {
+                                var item2 = curriculumDetails.curriculumDetailsModels;
+                                var row = table.insertRow();
+                                //var cell1 = row.insertCell(0);
+                                var cell1 = row.insertCell(0);
+                                var cell2 = row.insertCell(1);
+                                var cell3 = row.insertCell(2);
+                                var cell4 = row.insertCell(3);
+                                var cell5 = row.insertCell(4);
+
+
+                                //cell1.innerHTML = item2.name;//"NEW CELL1";
+                                cell1.innerHTML = item2[j].subjectName;
+                                cell2.innerHTML = item2[j].lessonName;
+                                cell3.innerHTML = item2[j].objectives;
+                                cell4.innerHTML = item2[j].week;
+                                var daysListe = (item2[j].day).split('-');
+                                var htmaka = '';
+                                var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                                for (var k = 0; k < daysListe.length; k++) {
+                                    if (daysListe[k] != '') {
+                                        if (k > 0) htmaka += ', ';
+                                        if(days[daysListe[k] - 1]) htmaka += days[daysListe[k] - 1];
+                                    }
+                                }
+                                if (htmaka == '') htmaka = item2[j].day;
+                                cell5.innerHTML = htmaka;
+                            }
+
+                            //$('#paginationModalDiv').pagination({
+                            //    // the number of entries
+                            //    total: data.total,//$("#Total").val(),
+                            //    // current page
+                            //    current: data.currentPage,// $("#CurrentPage").val(),
+                            //    // the number of entires per page
+                            //    length: 1,
+                            //    // pagination size
+                            //    size: 1,
+                            //    // Prev/Next text
+                            //    prev: "&lt;",
+                            //    next: "&gt;",
+                            //    // fired on each click
+                            //    click: function (e) {
+
+                            //        doClickView(btn,id,e.current)
+                            //    }
+
+                            //});
+                            
+
+                            $('#modal-default').modal('show');
+                        }
+                    });
+            }
+        };
+
+        function doClickEdit(btn, id) {
+
+            btn.onclick = function () { Edit(id) }
+        };
+
+        function doClickDelete(btn,id) {
+            btn.onclick = function () {
+                deleteUser(id)
+            }
+        };
+
+
+        function Delete(id){
+
+            $.ajax(
+            {
+                type: "GET",
+                url: "/Curriculum/DeleteCurriculum",
+                data: { id: id},
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                    success: function (data)
+                    {
+                        LoadCurriculums();
+                    }
+                });
+            return false;
+        };
+
+        function Edit(id) {
+            location.href = '@Url.Action("Edit", "Curriculum")?id='+id;
+        }
+
+    </script>
+
+}
+    <script>
+        (function () {
+            var link = document.getElementById("curriculum-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+
+    <script type="text/javascript">
+        function deleteUser(id) {
+            if (confirm("Do you want to delete this item?")) {
+                window.location.href = "/Curriculum/Delete/" + id;
+            }
+        }
+    </script>
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

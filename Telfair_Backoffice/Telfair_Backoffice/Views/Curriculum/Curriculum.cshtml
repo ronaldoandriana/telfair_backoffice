@@ -1,0 +1,507 @@
+﻿@model Telfair_Backend.Classes.Models.CurriculumModel
+@using Telfair_Backend.Classes.Models
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Curriculum";
+}
+
+@using (Html.BeginForm("SaveCurriculum", "Curriculum", FormMethod.Post, new
+{
+    enctype = "multipart/form-data",
+    data_ajax = "false"@*, onsubmit = "return confirm('Are you sure to save changes?');"*@ }))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Curriculum</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    @*left side*@
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+
+                                @Html.HiddenFor(m => m.Id)
+                                @Html.HiddenFor(m => m.MyId)
+                                @Html.HiddenFor(m => m.Status)
+                                @Html.LabelFor(m => m.Name)
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @required = "required" })
+                                @*<span asp-validation-for="Name" class="text-danger"></span>*@
+                            </div>
+
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Description)
+                                @Html.TextBoxFor(m => m.Description, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Department</label>
+                                @Html.DropDownListFor(m => m.DepartmentNodeId, (SelectList)ViewBag.NodeDepartment, "--Select department--", new { @class = "form-control" })
+                                @*<span asp-validation-for="DepartmentNodeId" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Grade</label>
+                                @Html.DropDownListFor(m => m.LevelNodeId, (SelectList)ViewBag.NodeLevel, "--Select department first--", new { @class = "form-control" })
+                                @*<span asp-validation-for="LevelNodeId" class="text-danger"></span>*@
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Subject</label>
+                                @Html.DropDownListFor(m => m.SubjectId, (SelectList)ViewBag.Subject, "--Select grade first--", new { @class = "form-control", @required = "required" })
+                                @*<span asp-validation-for="SubjectId" class="text-danger"></span>*@
+                            </div>
+
+                            <p style="margin-bottom: 5px;"><label for="Lessons">Levels</label> <span style="float: right;"><button type="button" class="btn btn-primary" data-toggle="modal" id="addobjectivesbutton" data-target="#addobjectives" style="margin-bottom: 9px;" @ViewBag.disabled><i class="fa fa-plus"></i> Add Level</button></span></p>
+                            <div id="warning_zone">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="LessonSection" class="form-group has-feedback" style="overflow: auto; max-height: 600px; width: 100%;">
+
+                                @Html.HiddenFor(model => model.Lessons, new { htmlAttributes = new { id = "lessons" } })
+                                @*@Html.HiddenFor(model => model.Objectives, new { htmlAttributes = new { id = "objectives" } })*@
+                                @Html.HiddenFor(model => model.Weeks, new { htmlAttributes = new { id = "weeks" } })
+                                @Html.HiddenFor(model => model.Terms, new { htmlAttributes = new { id = "terms" } })
+                                @Html.HiddenFor(model => model.Days, new { htmlAttributes = new { id = "days" } })
+                                <table id="Lesson" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <td><b>Name</b></td>
+                                            @*<td><b>Objectives</b></td>*@
+                                            <td><b>Term</b></td>
+                                            <td><b>Week</b></td>
+                                            <td><b>Day</b></td>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        List<CurriculumDetailModel> curriculumDetails = (List<CurriculumDetailModel>)ViewBag.curriculumDetails;
+                                        if (curriculumDetails != null)
+                                        {
+                                            @*foreach (var curriculumDetail in curriculumDetails)
+                                            {
+                                                <tr>
+                                                    <td><input id="chk@(curriculumDetail.LessonId)" type="checkbox" name="SelectedLessons" value="@curriculumDetail.LessonId" onchange="getSelected();" checked="@curriculumDetail.Selected" /> @curriculumDetail.LessonName</td>
+                                                    @*<td><input id="@("txtObjectives"+curriculumDetail.LessonId)" type="text" value="@curriculumDetail.Objectives" onblur="getSelected();" /> </td>*@
+                                                    @*<td><input id="@("txtTerm" + curriculumDetail.LessonId)" type="number" min="0" max="3" value="@curriculumDetail.Term" onblur="getSelected()" onchange="getSelected()" /> </td>
+                                                    <td><input id="@("txtWeek" + curriculumDetail.LessonId)" type="number" min="0" max="52" value="@curriculumDetail.Week" onblur="getSelected()" onchange="getSelected()" /> </td>
+                                                    <td><input id="@("txtDay" + curriculumDetail.LessonId)" type="text" value="@curriculumDetail.Day" onblur="getSelected();" /> </td>
+                                                </tr>*@
+                                            //}
+                                        }
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-info" id="save_curriculum">SAVE</button>
+                    <a href="/Curriculum/ViewCurriculum"><button type="button" class="btn btn-info">CANCEL</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addobjectives" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Add level</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <!-- general form elements -->
+                        <div class="box box-primary">
+                            <div class="box-body">
+                                <div class="row">
+                                    @*left side*@
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <div class="form-group has-feedback">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control" id = "ObjectivesName" />
+                                            </div>
+                                            <div class="form-group has-feedback">
+                                                <label>Description</label>
+                                                <input type="text" class="form-control" id = "ObjectivesDescription" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addbutton" onclick="addObjectives()"><i class="fa fa-plus"></i> Add</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <i></i>
+}
+    @section Scripts
+    {
+    <script type="text/javascript">
+
+        function addObjectives() {
+            var ObjectivesName = document.getElementById('ObjectivesName');
+            var ObjectivesDescription = document.getElementById('ObjectivesDescription');
+            var ObjectivesSubject = document.getElementById('SubjectId');
+            if (ObjectivesSubject && ObjectivesDescription && ObjectivesName) {
+                var name = ObjectivesName.value;
+                var subject = ObjectivesSubject.value;
+                var description = ObjectivesDescription.value;
+                if (!name || name == undefined || name == "") showNotification('Warning', 'Please fill in the name field!', 'warning');
+                if (!description || description == undefined || description == "") showNotification('Warning', 'Please fill in the description field!', 'warning');
+                if (!subject || subject == undefined || subject == "") showNotification('Warning', 'Please fill in the subject field!', 'warning');
+                else {
+                    var addbutton = document.getElementById('addbutton');
+                    if (addbutton) {
+                        addbutton.innerHTML = "<i class='fa fa-spinner fa-pulse'></i> Saving...";
+                        addbutton.setAttribute("disabled", "disabled");
+                    }
+                    $.getJSON("/Lesson/AddObjectives", { name: name, description: description, subjectid: subject },
+                        function (results) {
+                            if (results.status == 1) {
+                                showNotification("Success", results.message, "success");
+                                if (addbutton) {
+                                    addbutton.innerHTML = "<i class='fa fa-plus'></i> Add";
+                                    addbutton.removeAttribute("disabled");
+                                }
+                                LoadLessons($("#SubjectId option:selected").val(), $("#Id").val());
+                                $("#ObjectivesName").val("");
+                                $("#ObjectivesDescription").val("");
+                                $("#addobjectives").modal("hide");
+                            }
+                            else if (results.status == 0) {
+                                showNotification("Error", results.message, "error");
+                                if (addbutton) {
+                                    addbutton.innerHTML = "<i class='fa fa-plus'></i> Add";
+                                    addbutton.removeAttribute("disabled");
+                                }
+                            }
+                        });
+                }
+            }
+        }
+
+        var lessonbysubject = '';
+        function getSelected() {
+            var lessons = "";
+            var objectives = "";
+            var weeks = "";
+            var terms = "";
+            var days = "";
+            var line_counter = 0;
+            //$('input[type=checkbox]').each(function () {
+            $('.lessons_line').each(function () {
+                    if (this.checked) {
+                        lessons += this.value + ",";
+                        //objectives += $('#txtObjectives' + this.value).val() + ",";
+                        weeks += $('#txtWeek' + this.value).val() + ",";
+                        terms += $('#txtTerm' + this.value).val() + ",";
+                        //days += $('#txtDay' + this.value).val() + ",";
+                        var line = '';
+                        $('.days_selection' + line_counter + '').each(function () {
+                            if (this.checked) {
+                                line += this.value + '-';
+                            }
+                        });
+                        if (line != '') line += ',';
+                        days += line;
+                }
+                line_counter++;
+            });
+            $("#Lessons").val(lessons);
+            //$("#Objectives").val(objectives);
+            $("#Weeks").val(weeks);
+            $("#Terms").val(terms);
+            $("#Days").val(days);
+            return false;
+        }
+
+        $(document)
+            .ready(function () {
+                
+                $(function () {
+                    $("#LevelNodeId").change(function () {
+                        $.getJSON("/Curriculum/ViewSubjectByLevel", { levelId: $("#LevelNodeId option:selected").val() },
+                            function (results) {
+                                $("#SubjectId").empty();
+                                LoadLessons($("#SubjectId option:selected").val());
+
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option value=''>--Select subject--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#SubjectId").append(options);
+
+                            });
+                    });
+                });
+
+                $(function () {
+                    $("#DepartmentNodeId").change(function () {
+                        $.getJSON("/Curriculum/GetNodesByParent", { parentNodeId: $("#DepartmentNodeId option:selected").val() },
+                            function (results) {
+                                $("#LevelNodeId").empty();
+                                $("#SubjectId").empty();
+                                LoadLessons($("#Subjects option:selected").val());
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option value=''>--Select grade--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#LevelNodeId").append(options);
+                                $("#SubjectId").append("<option value=''>--Select grade first--</option>");
+                            });
+                    });
+                });
+
+                ///Modal dropdown
+                $(function () {
+                    $("#ObjectivesGrade").change(function () {
+                        $.getJSON("/Curriculum/ViewSubjectByLevel", { levelId: $("#ObjectivesGrade option:selected").val() },
+                                function (results) {
+                                    $("#ObjectivesSubject").empty();
+                                    //LoadLessons($("#ObjectivesSubject option:selected").val());
+
+                                    var options = "<option value=''>--Select subject--</option>";
+                                    $.each(results, function (i, subject) {
+                                        options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                    });
+                                    $("#ObjectivesSubject").append(options);
+
+                                });
+                        });
+                    });
+
+                $(function () {
+                        $("#ObjectivesDepartment").change(function () {
+                            $.getJSON("/Curriculum/GetNodesByParent", { parentNodeId: $("#ObjectivesDepartment option:selected").val() },
+                                function (results) {
+                                    $("#ObjectivesGrade").empty();
+                                    $("#ObjectivesSubject").empty();
+                                    //LoadLessons($("#Subjects option:selected").val());
+                                    var options = "<option value=''>--Select grade--</option>";
+                                    $.each(results, function (i, subject) {
+                                        options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                    });
+                                    $("#ObjectivesGrade").append(options);
+                                    $("#ObjectivesSubject").append("<option value=''>--Select grade first--</option>");
+                                });
+                        });
+                    });
+            });
+
+        $(document)
+            .ready(function () {
+
+                $("#SubjectId").on("change", function () {
+                    var departmentId = $("#DepartmentNodeId option:selected").val();
+                    var gradeId = $("#LevelNodeId option:selected").val();
+                    var subjectId = $("#SubjectId option:selected").val();
+                    $.ajax(
+                        {
+                            type: "GET",
+                            url: "/Curriculum/isCurriculumExist",
+                            data: { departmentId: departmentId, gradeId: gradeId, subjectId: subjectId },
+                            contentType: "application/json;charset=utf-8",
+                            dataType: "json",
+                            success: function (data) {
+                                var curriculumData = data;
+                                var warning_zone = document.getElementById('warning_zone');
+                                if (warning_zone) warning_zone.innerHTML = "";
+                                var save_curriculum = document.getElementById('save_curriculum');
+                                var isAdding = document.getElementById('isAdding');
+                                if (isAdding && curriculumData && curriculumData.status == 1 && curriculumData.exist) {
+                                    if (warning_zone) {
+                                        warning_zone.innerHTML = "<div class='mycard'>" +
+                                            "<div class='card-body'> <i class='fa fa-exclamation-triangle'></i>This curriculum is already exist, please click <a href='/Curriculum/Edit/" + curriculumData.curriculumId + "'>here</a> if you want to edit it!</div>" +
+                                                                 "</div>";
+                                    }
+                                    if (save_curriculum) save_curriculum.setAttribute('disabled', 'disabled');
+                                    LoadLessons('', '');
+                                }
+                                else {
+                                    if (save_curriculum) save_curriculum.removeAttribute('disabled');
+                                    LoadLessons($("#SubjectId option:selected").val(), $("#Id").val());
+
+                                    var i = 0;
+                                    $('input[type=checkbox]').each(function () {
+                                        this.checked = lessonbysubject[i].selected;
+                                        i++;
+                                    });
+                                    var subjectId = $("#SubjectId option:selected").val();
+                                    var addobjectives = document.getElementById("addobjectivesbutton");
+                                    if (!subjectId || subjectId == undefined || subjectId == "") {
+                                        if (addobjectives) {
+                                            addobjectives.setAttribute("disabled", "disabled");
+                                            addobjectives.removeAttribute("enabled");
+                                        }
+                                    }
+                                    else {
+                                        if (addobjectives) {
+                                            addobjectives.setAttribute("enabled", "enabled");
+                                            addobjectives.removeAttribute("disabled");
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                });
+                //getSelected();
+            });
+        
+
+        function LoadLessons(subjectid, curriculumid) {
+            getSelected();
+            //var page = document.getElementById("Lessons").value;
+            $.ajax(
+                {
+                    type: "GET",
+                    url: "/Curriculum/ViewAllCurriculumDetailsByCurriculum",
+                    data: { subjectId: subjectid, curriculumId: curriculumid },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#Lesson tr:gt(0)").remove();
+                        lessonbysubject = data;
+                        var table = document.getElementById("Lesson");
+                        var department = $("#DepartmentNodeId option:selected").val();
+                        for (i = 0; i < data.length; i++) {
+                            var item = data[i];
+                            var row = table.insertRow();
+                            var cell1 = row.insertCell(0)
+                            //var cell2 = row.insertCell(1);
+                            var cell3 = row.insertCell(1);
+                            var cell4 = row.insertCell(2);
+                            var cell5 = row.insertCell(3);
+
+                            //cell1.innerHTML = item.name;//"NEW CELL1";
+
+                            //checkbox + text
+                            var checkbox = document.createElement('input');
+                            checkbox.id = "chk" + item.lessonId;
+                            checkbox.type = "checkbox";
+                            checkbox.className = 'lessons_line';
+                            if (item.selected) checkbox.setAttribute('checked', 'checked');
+                            checkbox.value = item.lessonId;
+                            //checkbox.checked = item.selected;
+                            cell1.appendChild(checkbox);
+                            cell1.innerHTML += item.lessonName;
+
+                           // Objective textbox
+                            //var textbox = document.createElement('input');
+                            //textbox.id = "txtObjectives" + item.lessonId;
+                            //textbox.type = "text";
+                            //textbox.value = item.objectives;
+                            //cell2.appendChild(textbox);
+
+                            //Week textbox
+                            var textbox = document.createElement('input');
+                            textbox.id = "txtWeek" + item.lessonId;
+                            textbox.type = "number";
+                            textbox.min = 0;
+                            textbox.max = 52;
+                            textbox.value = item.week;
+                            cell4.appendChild(textbox);
+
+                            //Term textbox
+                            var textbox = document.createElement('input');
+                            textbox.id = "txtTerm" + item.lessonId;
+                            textbox.type = "number";
+                            textbox.min = 1;
+                            textbox.max = 3;
+                            textbox.value = item.term;
+
+                            cell3.appendChild(textbox);
+
+                            //Day textbox
+                            var textbox = document.createElement('input');
+                            textbox.id = "txtDay" + item.lessonId;
+                            textbox.type = "text";
+                            textbox.value = item.day;
+                            textbox.min = 1;
+                            textbox.max = 5;
+                            if (department != '6ab48005-59f2-11e9-8ceb-fb681531b90b') {
+                                textbox.disabled = true;
+                            }
+                            //cell5.appendChild(textbox);
+                            var htmaka = "";
+                            var days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                            for (var ii = 1; ii <= 5; ii++) {
+                                var ischecked = "";
+                                if (item.day.includes('' + ii)) ischecked = "checked='checked'";
+                                htmaka += "<span style='cursor: pointer;'><input class='days_selection"+i+"' type='checkbox' " + ischecked + " value='" + ii + "' id='day" + i + "" + ii + "'>";
+                                htmaka += "<label for='day" + i + "" + ii + "'>" + days[ii - 1] + "</label></span>";
+                                htmaka += "&nbsp;&nbsp;&nbsp;";
+                            }
+                            cell5.innerHTML = htmaka;
+
+                        }
+                        $("input[type='checkbox']").change(function () {
+                            getSelected();
+                        });
+
+                        $("input[type='text']").blur(function () {
+                            getSelected();
+                        });
+                    }
+                });
+            return false;
+        };
+        $(document).ready(function () {
+            var subjectid = document.getElementById('subjectid');
+            var curriculumid = document.getElementById('curriculumid');
+            if (subjectid && curriculumid) { LoadLessons(subjectid.value, curriculumid.value); }
+        })
+
+    </script>
+
+}
+<script>
+    (function () {
+        var link = document.getElementById("curriculum-link");
+        if (link) link.classList.add("active_link");
+        //getSelected();
+    })();
+</script>
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script>}
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script>}
+
+@{ 
+    
+        string subjectid = "", curriculumid = "";
+        if (ViewBag.curriculumid != null && ViewBag.subjectid != null)
+        {
+            subjectid = ViewBag.subjectid;
+            curriculumid = ViewBag.curriculumid;
+            <input type="hidden" id="subjectid" value="@subjectid"/>
+            <input type="hidden" id="curriculumid" value="@curriculumid"/>
+    }
+    if(ViewBag.isAdding != null)
+    {
+        <input type="hidden" value="true" id="isAdding" />
+    }
+}

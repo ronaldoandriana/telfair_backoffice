@@ -1,0 +1,59 @@
+﻿@model Telfair_Backend.Classes.Models.CurriculumDetailModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "CurriculumDetail";
+}
+
+@using (Html.BeginForm("SaveCurriculumDetail", "CurriculumDetail", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false" }))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Curriculum Detail</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    @*left side*@
+                    <div class="col-md-6">
+                        <div class="form-group">
+
+                            <div class="form-group has-feedback">
+                                @Html.HiddenFor(m => m.Id)
+                                @Html.HiddenFor(m => m.MyId)
+                                @Html.HiddenFor(m => m.Status)
+                                <label>Curriculum</label>
+                                @Html.DropDownListFor(m => m.CurriculumId, (SelectList)ViewBag.CurriculumModel, "--Select--", new { @class = "form-control" })
+                                <span asp-validation-for="CurriculumId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Lesson</label>
+                                @Html.DropDownListFor(m => m.LessonId, (SelectList)ViewBag.LessonModel, "--Select--", new { @class = "form-control" })
+                                <span asp-validation-for="LessonId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Objectives)
+                                @Html.TextBoxFor(m => m.Objectives, new { @class = "form-control" })
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-info">SAVE</button>
+                    <button type="reset" class="btn btn-info">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

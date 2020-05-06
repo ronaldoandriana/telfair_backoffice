@@ -1,0 +1,276 @@
+﻿@model Telfair_Backend.Classes.Models.PlanModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Plan";
+    var role = (string)ViewBag.RoleName;
+}
+
+@using (Html.BeginForm("SavePlan", "Plan", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax = "false"@*, onsubmit = "return confirm('Are you sure to save changes?');"*@}))
+{
+    <!-- left column -->
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Weekly Plan</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @Html.HiddenFor(m => m.Id)
+                            @Html.HiddenFor(m => m.MyId)
+                            @Html.HiddenFor(m => m.Status)
+                            <div class="form-group has-feedback">
+                                @Html.Label("Grade")
+                                @Html.DropDownListFor(m => m.NodeLevelId, (SelectList)ViewBag.NodeLevelType, "--Select grade--", new { @class = "form-control", @required = "required" })
+                                <span asp-validation-for="NodeLevelId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group has-feedback">
+                                <label>Subject</label>
+                                @Html.DropDownListFor(m => m.SubjectId, (SelectList)ViewBag.Subject, "--Select grade first--", new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Level")
+                                @Html.DropDownListFor(m => m.LessonId, (SelectList)ViewBag.Lesson, "--Select subject first--", new { @class = "form-control", @required = "required" })
+                                <span asp-validation-for="LessonId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Teacher")
+                                @Html.DropDownListFor(m => m.EmployeeIds, (SelectList)ViewBag.Employee, "--Select teacher--", new { @class = "form-control", @required = "required" })
+                                <span asp-validation-for="EmployeeIds" class="text-danger"></span>
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Plan Type")
+                                @Html.DropDownListFor(m => m.PlanTypeId, (SelectList)ViewBag.PlanType, "--Select plan type--", new { @class = "form-control", @required = "required" })
+                                <span asp-validation-for="PlanTypeId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Note)
+                                @Html.TextBoxFor(m => m.Note, new { @class = "form-control", @required = "required" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            @*@if (role.ToLower() == "administrator")
+                {*@
+                            <div id="duration" class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Duration)
+                                @Html.TextBoxFor(m => m.Duration, new { @class = "form-control", @required = "required" })
+                            </div>
+                            @*}*@
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Aims)
+                                @Html.TextBoxFor(m => m.Aims, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Activities)
+                                @Html.TextBoxFor(m => m.Activities, new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Materials)
+                                @Html.TextBoxFor(m => m.Materials, new { @class = "form-control", @required = "required" })
+                            </div>
+                            @*@if (role.ToLower() == "administrator")
+                            {*@
+                                <div id="noofchildren" class="form-group has-feedback">
+                                    @Html.Label("No of Children")
+                                    @Html.TextBoxFor(m => m.NoOfChildren, new { @class = "form-control", @required = "required" })
+                                </div>
+                                <div id="days" class="form-group has-feedback">
+                                    @Html.HiddenFor(model => model.Days, new { htmlAttributes = new { id = "days" } })
+
+                                    <table id="Lesson" class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <td><b>Days</b></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input id="chkMonday" type="checkbox" value="Monday" onchange="getSelected();" /> Monday </td>
+                                                <td><input id="chkTuesday" type="checkbox" value="Tuesday" onchange="getSelected();" /> Tuesday </td>
+                                                <td><input id="chkWednesday" type="checkbox" value="Wednesday" onchange="getSelected();" /> Wednesday </td>
+                                                <td><input id="chkThursday" type="checkbox" value="Thursday" onchange="getSelected();" /> Thursday </td>
+                                                <td><input id="chkFriday" type="checkbox" value="Friday" onchange="getSelected();" /> Friday </td>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            @*}*@
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Method)
+                                @Html.TextAreaFor(m => m.Method, new { @class = "form-control", @required = "required", style = "height: 200px" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.OutcomesNotes)
+                                @Html.TextBoxFor(m => m.OutcomesNotes, new { @class = "form-control", @required = "required" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+
+                            <div class="form-group has-feedback">
+                                @Html.Label("Date From")<br />
+                                @*@Html.TextBoxFor(m => m.DateFrom, new { @type = "date", @class = "form-control", @min = , @required = "required", @value =  })*@
+                                <input class="form-control" data-val="true" data-val-required="The DateFrom field is required." id="DateFrom" min="@DateTime.Now.ToString("MM'/'dd'/'yyyy")" name="DateFrom" required="required" type="date" value="@(DateTime.Now.ToString("yyyy'-'MM'-'dd"))">
+
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Date To")      <br />
+                                @*@Html.TextBoxFor(m => m.DateTo, new { @type = "date", @class = "form-control", @min = DateTime.Now.ToString("MM'/'dd'/'yyyy"), @required = "required", @value = ""+DateTime.Now.AddDays(5).ToString("MM'/'dd'/'yyyy") })*@
+                                <input class="form-control" data-val="true" data-val-required="The DateFrom field is required." id="DateTo" min="@DateTime.Now.ToString("MM'/'dd'/'yyyy")" name="DateTo" required="required" type="date" value="@(DateTime.Now.AddDays(5).ToString("yyyy'-'MM'-'dd"))">
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Week)
+                                @Html.TextBoxFor(m => m.Week, new { @type = "number", @class = "form-control", @min = 1, @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.LabelFor(m => m.Term)
+                                @Html.TextBoxFor(m => m.Term, new { @type = "number", @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group has-feedback">
+                                @Html.Label("Date of Issue")
+                                @Html.TextBoxFor(m => m.DateOfIssue, new { @class = "form-control", @readonly = true })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box-footer">
+            <div class="row" align="right">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-info">SAVE</button>
+                    <a href="/Plan/ViewMyPlan"><button type="button" class="btn btn-info">CANCEL</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+}
+@section Scripts
+    {
+    <script type="text/javascript">
+        var employee = '';
+        $(document)
+            .ready(function () {
+
+                  $(function () {
+                        var days = $("#Days").val();
+
+                        if(days != null)
+                        {
+                           if( days.indexOf("Monday" ) != -1 )
+                                $("#chkMonday").prop("checked", true);
+                           if( days.indexOf("Tuesday" ) != -1 )
+                                $("#chkTuesday").prop("checked", true);
+                           if( days.indexOf("Wednesday" ) != -1 )
+                                $("#chkWednesday").prop("checked", true);;
+                           if( days.indexOf("Thursday" ) != -1 )
+                                $("#chkThursday").prop("checked", true);
+                           if( days.indexOf("Friday" ) != -1 )
+                                $("#chkFriday").prop("checked", true);         
+                        }
+                    });
+
+                $(function () {
+                    $("#NodeLevelId").change(function () {
+                        $.getJSON("/Subject/ViewSubjectByLevel", { levelId: $("#NodeLevelId option:selected").val() },
+                            function (results) {
+                                $("#SubjectId").empty();
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option value=''>--Select subject--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#SubjectId").append(options);
+
+                            });
+
+                        var level = $("#NodeLevelId option:selected").val();
+
+                        if (level === 'ac97591f-15fd-4c5a-aa2c-ba1b965245a6' || level === 'cb3d9100-3078-496f-8f43-5dd35b03b4d5'|| level === 'a1acc9c4-35e7-40a1-8e97-01120ec26c13' || level === 'a1acc9c4-35e7-40a1-8e97-01120ec26c14')
+                        {
+                            //$("#duration").show();
+                            //$("#noofchildren").show();
+                            //$("#days").show();
+                        }
+                        else
+                        {
+                            //$("#duration").hide();
+                            //$("#noofchildren").hide();
+                            //$("#days").hide();
+                        }
+                    });
+                });
+
+                $(function () {
+                    $("#SubjectId").change(function () {
+                        $.getJSON("/Curriculum/GetLessonsBySubject", { subjectId: $("#SubjectId option:selected").val() },
+                            function (results) {
+                                $("#LessonId").empty();
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option value=''>--Select Level--</option>";
+                                $.each(results, function (i, subject) {
+                                    options += '<option value = ' + subject.id + '>' + subject.name + '</option>';
+                                });
+                                $("#LessonId").append(options);
+
+                            });
+
+                        $.getJSON("/Plan/GetEmployeesBySubject", { id: $("#SubjectId option:selected").val() },
+                            function (results) {
+                                employee = results;
+                                $("#EmployeeIds").empty();
+                                // var select = "<option>--Select--</option>"
+                                var options = "<option value=''>--Select teacher--</option>";
+                                $.each(results, function (i, employee) {
+                                    options += '<option value = ' + employee.id + '>' + employee.fullName + '</option>';
+                                });
+                                $("#EmployeeIds").append(options);
+
+                            });
+
+
+
+                    });
+                });
+            });
+
+         function getSelected() 
+        {    
+            var days = "";
+
+            $('input[type=checkbox]').each(function () {
+                if (this.checked) {
+                    days += this.value + ",";                   
+                }
+            });
+            $("#Days").val(days);          
+            return false;
+        }
+
+    </script>
+}
+
+    <script>
+        (function () {
+            var link = document.getElementById("plan-link");
+            if (link) link.classList.add("active_link");
+        })();
+    </script>
+
+@if (ViewBag.error != null) { <script> showNotification('Error', '@ViewBag.error', 'error'); </script> }
+@if (ViewBag.success != null) { <script> showNotification('Success', '@ViewBag.success', 'success'); </script> }

@@ -1,0 +1,129 @@
+﻿@model IEnumerable<Telfair_Backend.Classes.Models.PlanModel>;
+
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "ViewPlan";
+}
+
+@using (Html.BeginForm())
+{
+<div id="x">
+    <div id="y">
+        <input type="hidden" id="GridHtml" name="GridHtml" />
+    </div>
+    <div id="Grid">
+
+
+        <table class="table">
+            <tr>
+                <th>
+                    Lesson Title
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Aims)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Materials)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Method)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OutcomesNotes)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateFrom)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateTo)
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LessonName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Aims)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Activities)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Materials)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Method)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OutcomesNotes)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateFrom)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateTo)
+                    </td>
+                </tr>
+            }
+
+
+
+        </table>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                @(new Microsoft.AspNetCore.Html.HtmlString(ViewBag.pagination))
+            </ul>
+        </nav>
+    </div>
+    <button type="submit" id="btnSubmit" class="btn btn-info">Export</button>
+    <button type= "button" id="testbtn" class="btn btn-info">test</button>
+</div>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $("#btnSubmit").click(function abc() {
+
+            var html = $("#Grid").html();
+
+            // document.getElementById("GridHtml") = html;
+
+            data = {
+                PdfHtmlTemplate: html
+            };
+
+            $.ajax({
+                url: '@Url.Action("BuildIronPDFURL", "Plan")', //
+                data: data,
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    //do something
+                }
+            });
+
+        });
+
+        $("#testbtn").click(function abc2() {
+
+            var html = $("#Grid").html();
+            $("#GridHtml").val(html);
+            alert(html);
+        });
+    </script>
+    }
+
+
+
+
+
+
+
+
+
